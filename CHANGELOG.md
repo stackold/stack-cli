@@ -1,6 +1,17 @@
 [+ 12/01/2016] Stackrecord CLI
-Halis Duraki <halis_duraki@outlook.com>
+Halis Duraki <dev@stackrecord.com>
 Stackrecord  <https://stackrecord.com>
+
+13/01/2016 (Thiz looks good)
+[+] Added: A new way to manipulate with commands and operators
+[+] Added: SET and UNSET working repository
+[+] Added: SET and UNSET working version
+[+] Added: Delete a repository
+[+] Added: List repository information
+[+] Added: Add a new change in a version
+[+] Fixed: Crash on exit
+[+] Fixed: Crash when repository has no releases
+[+] Fixed: Return changes of particular version
 
 13/01/2016 (The day after tomorrow)
 [+] Added: Create new repository

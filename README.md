@@ -1,8 +1,8 @@
 ### Stackrecord
-Stackrecord is Github based changelog repository API built for developers to keep changes of their project releases. We offer a free accounts for all solo developers and freelancers. You can read more about Stackrecord on our [official website](http://stackrecord.com).
+Stackrecord is Github based changelog repository API built for developers to keep changes of their project releases. We offer a free accounts for all solo developers and freelancers. You can read more about Stackrecord on our [official website](https://stackrecord.com).
 
 ### Stack-CLI
-Stackrecord official repository for our [CLI](http://stackrecord.com/cli) (Command Line Interface) that connects directly to our [API](Stackrecord v1) made in Ruby. The tool is open-source and currently in beta. You can also use this tool to learn how our API work. The full documentation of our API is located [here](http://stackrecord.com/docs). Stack-CLI is based on our sister-project also made by Stackrecord for offline release note generation [Vicilog](https://github.com/dn5/vicilog).
+Stackrecord official repository for our [CLI](https://stackrecord.com/cli) (Command Line Interface) that connects directly to our [API](Stackrecord v1) made in Ruby. The tool is open-source and currently in beta. You can also use this tool to learn how our API work. The full documentation of our API is located [here](http://stackrecord.com/docs). Stack-CLI is based on our sister-project also made by Stackrecord for offline release note generation [Vicilog](https://github.com/dn5/vicilog).
 
 ### How it works
 Our CLI is pretty simple yet fast (pure libraries). These are the steps to make your Stackrecord account works with the CLI and API back-end.  
@@ -14,28 +14,6 @@ Our CLI is pretty simple yet fast (pure libraries). These are the steps to make 
 
 ### Usage
 The usage is divided in tree operations:
-
-* **GET** (to get changelog data)
-* **SET** (to set changelog data)
-* **OTHER** (for other functions)
-
-#### GET (Get changelog data from our API)
-* `--list` (List all repositories for logged user)
-* `--versions {repository}` (List relase versions for repository)
-* `--commits {repository} {o:version}` (List changelog for repository; optional: version)
-
-#### SET (Set changelog data over API)
-* `--new {repository}` (Create a new repository)
-* `--version {version}` (Create a new release version)
-* `--commit {version}` (Create a new change in a version)
-
-#### Other
-* `--help` (Display help menu)
-* `--login {username}` (Login to account) 
-	* *Note: You must [register](http://stackrecord.com/signup) first*
-* `--create {username} {token}` (Create a new offline login)
-	* *Note: You must [register](http://stackrecord.com/signup) first*
-* `--logout` (Logout from account / Use other account)
 
 ### Requirements
 Stack-CLI is currently deployed over pure Ruby libraries. The `Ruby` version is `1.9.3`.
