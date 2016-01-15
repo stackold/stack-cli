@@ -1,13 +1,14 @@
 # -
 # Stackrecord CLI (API v1)
 # -
-# Author 		: Stackrecord
+# Author 		: Stackrecord <dev@stackrecord.com
 # Twitter		: @stackrecordcom
 # Website 		: https://stackrecord.com
 # - 
 # 
 # #!/usr/bin/env ruby
-@stack_ver = "100"
+
+@stack_ver = "200"
 @stack 	   = "stack"
 @stack_api = "https://stackrecord.com/api/v1/"
 
@@ -19,12 +20,13 @@
 
 @def_dir 		=	"users/"				# User directory
 
-@cur_info 		=	""						# Is:: (username/repository)
+@cur_info 		=	""						# Is:: (username/repository/version) [workspace]
 
 
 require 'yaml'
 require 'fileutils'
 require 'net/http'
+require 'net/https'
 require 'json'
 
 # Don't bypass, it will break :(
@@ -60,7 +62,7 @@ def is_version
 	version
 end
 
-def stack_unset_vers
+def stack_unset_vers # Unset version (++v)
 	puts "Version " + @def_version + "@" + @def_repo + " not in use anymore."
 	puts "Use --version or --v to list and set version."
 	@def_version = ""
@@ -69,7 +71,7 @@ def stack_unset_vers
 	stack_main
 end
 
-def stack_set_vers(version)
+def stack_set_vers(version) # Set workspace version (--v)
 	#puts "Loading version for repository " + @def_use + "@" + @def_repo + "/" + version
 	@def_version = version
 	@cur_info = "(" + @def_user + "/" + @def_repo + "/" + @def_version + ")"
@@ -77,7 +79,7 @@ def stack_set_vers(version)
 	stack_main 
 end
 
-def stack_set_repo(repo)
+def stack_set_repo(repo) # Set workspace repository (--use)
 	puts "Loading repository ..."
 	@def_repo = repo
 	@cur_info = "(" + @def_user + "/" + @def_repo + ")"
@@ -86,7 +88,7 @@ def stack_set_repo(repo)
 	stack_main
 end
 
-def stack_unset_repo
+def stack_unset_repo # Unset workspace repository (++use)
 	puts "Repository " + @def_repo + " not in use anymore."
 	puts "Use --list or --set to list and set a repository."
 	@def_repo = ""
@@ -197,82 +199,86 @@ end
 ##########################################################
 
 ##########################################################
+# FUNCS: METHODS * request
+##########################################################
+# Implementation: v200
+# Make a HTTPS call on Stackrecord API
+def stack_make_call(call)
+	uri 				= URI.parse(call)
+	https 				= Net::HTTP.new(uri.host, uri.port)
+	https.use_ssl 		= true
+	https.verify_mode 	= OpenSSL::SSL::VERIFY_NONE
+	request 			= Net::HTTP::Get.new(uri.request_uri)
+	full 				= https.request(request).body
+	@hash 				= JSON.parse(full)
+
+	return
+end
+
+##########################################################
 # FUNCS: OPERATIONS (GET)
 ##########################################################
 def stack_get_list(user) # API/repository/get/{username}
-	call 	= @stack_api + "repository/get/" + user
-	
-	result 	= Net::HTTP.get(URI.parse(call))
-	hash 	= JSON.parse(result)
+	stack_make_call(@stack_api + "repository/get/" + user)
 
 	puts "Available user repositories @ " + user
-	puts hash['repository_list']
+	puts @hash['repository_list']
 
 	stack_main
 end
 
 def stack_get_info(repository) # API/repository/{username}/{repository_name}
-	call 	= @stack_api + "repository/" + @def_user + "/" + repository
-
-	result  = Net::HTTP.get(URI.parse(call))
-	hash 	= JSON.parse(result)
+	stack_make_call(@stack_api + "repository/" + @def_user + "/" + repository)
 
 	puts "Repository owner: " + @def_user
 	puts "Repository name:  " + repository
-	puts "Description: 	  " + hash['repository_description']
-	puts "Type: 		  " + hash['repository_type']
-	puts "Created: 	  " + hash['repository_created']
+	puts "Description: 	  " + @hash['repository_description']
+	puts "Type: 		  " + @hash['repository_type']
+	puts "Created: 	  " + @hash['repository_created']
+
+	stack_main
 end
 
 def stack_get_versions(repository) # API/commit/get/{username}/{repository_name}
-	call	= @stack_api + "commit/get/" + @def_user + "/" + repository
+	stack_make_call(@stack_api + "commit/get/" + @def_user + "/" + repository)
 
-	result 	= Net::HTTP.get(URI.parse(call))
-	hash 	= JSON.parse(result)
+	puts "Repository:       " + repository
 
-
-	stack_get_info(repository)
-
-	if hash.member?("error")
+	if @hash.member?("error")
 		puts "Total releases:   0"
 	else
-		puts "Total releases:   " + hash.count.to_s
+		puts "Total releases:   " + @hash.count.to_s
 	end
 	puts "Available releases"
 	puts "-"
 	puts "Note: <v> is additional char and not displayed over API."
 
-	if hash.member?("error")
+	if @hash.member?("error")
 		puts "Repository empty."
 		stack_main
 		return
-	end
-
-	hash.each do |child|
+	end else 
+		@hash.each do |child|
 		puts "v" + child['commit_rel_version'] + " | " + child['commit_rel_name'] + " | " + child['commit_rel_created']
 	end
+	
 	stack_main
 	return
 end
 
 def stack_get_commits(repository, version) # API/change/get/{username}/{repository_name}/{version}
-	call 	= @stack_api + "change/get/" + @def_user + "/" + repository + "/" + version
+	stack_make_call(@stack_api + "change/get/" + @def_user + "/" + repository + "/" + version)
 
-	result  = Net::HTTP.get(URI.parse(call))
-	hash    = JSON.parse(result)
-
-	stack_get_info(repository)
+	#stack_get_info(repository)
 	puts "Getting changes for repository @ " + repository
 	puts "---------------------------------"
 
-		hash.each do |child|
+		@hash.each do |child|
 				puts "v" + child['release']['version'].to_s
 				puts child['release']['line']
 		end
 		stack_main
 		return
-
-	#end
 end
 ##########################################################
 # FUNCS: OPERATIONS END
@@ -282,12 +288,7 @@ end
 # FUNCS: OPERATIONS (SET)
 ##########################################################
 def stack_new_repository(repository) # API/repository/create/{username}/{repository_name}
-	call	= @stack_api + "repository/create/" + @def_user + "/" + repository + "?apitoken=" + @def_token
-
-	result  = Net::HTTP.get(URI.parse(call))
-	hash 	= JSON.parse(result)
-
-	#puts hash
+	stack_make_call(@stack_api + "repository/create/" + @def_user + "/" + repository + "?apitoken=" + @def_token)
 
 	puts "Creating or rebuilding an old repository " + @def_user + "@" + repository
 	puts "Repository available @ https://stackrecord.com/" + @def_user + "/" + repository
@@ -309,12 +310,10 @@ def stack_delete_repository(repository) # API/repository/delete/{username}/{repo
 			end
 
 				# Deleting procedure
-				call 	= @stack_api + "repository/delete/" + @def_user + "/" + repository + "?apitoken=" + @def_token
-				result 	= Net::HTTP.get(URI.parse(call))
-				hash 	= JSON.parse(result)
+				stack_make_call(@stack_api + "repository/delete/" + @def_user + "/" + repository + "?apitoken=" + @def_token)
 
-				if hash.member?("error") 
-					puts "ERROR: " + hash['message']
+				if @hash.member?("error") 
+					puts "ERROR: " + @hash['message']
 					stack_main
 				else
 					puts "Repository " + @def_user + "@" + repository + " removed."
@@ -328,12 +327,7 @@ def stack_delete_repository(repository) # API/repository/delete/{username}/{repo
 end
 
 def stack_set_version(repository, version) # API/commit/new/{username}/{repository}/{version}
-	call 	= @stack_api + "commit/new/" + @def_user + "/" + repository + "/" + version + "?apitoken=" + @def_token
-
-	#puts call
-
-	result  = Net::HTTP.get(URI.parse(call))
-	hash    = JSON.parse(result)
+	stack_make_call(@stack_api + "commit/new/" + @def_user + "/" + repository + "/" + version + "?apitoken=" + @def_token)
 
 	puts "Creating a new version or rebuilding an old one"
 	puts @def_user + '@' + repository + "/" + version
@@ -343,10 +337,7 @@ def stack_set_version(repository, version) # API/commit/new/{username}/{reposito
 end
 
 def stack_delete_version(repository, version) # API/commit/remove/{username}/{repository}/{version}
-	call 	= @stack_api + "commit/remove/" + @def_user + "/" + repository + "/" + version + "?apitoken=" + @def_token
-
-	result  = Net::HTTP.get(URI.parse(call))
-	hash    = JSON.parse(result)
+	stack_make_call(@stack_api + "commit/remove/" + @def_user + "/" + repository + "/" + version + "?apitoken=" + @def_token)
 
 	puts "Deleting a version from repositry ..."
 	puts @def_user + '@' + repository + "/" + version
@@ -374,15 +365,13 @@ def stack_set_commit(repository, version) # API/change/new/{username}/{repositor
 	puts @final + ': ' + @cl_change
 	puts "------------------------------------------------"
 
-	call	= @stack_api + "change/new/" + @def_user + "/" + repository + "/" + version + "?apitoken=" + @def_token + "&tag=" + @final + "&change=" + @cl_change
+	@cl_change_encoded = URI.escape(@cl_change)
 
-	result  = Net::HTTP.get(URI.parse(URI.escape(call)))
-	hash    = JSON.parse(result)
-	#puts hash
-
+	stack_make_call(@stack_api + "change/new/" + @def_user + "/" + repository + "/" + version + "?apitoken=" + @def_token + "&tag=" + @final + "&change=" + @cl_change_encoded)
 	stack_get_commits(repository, version) 
 end
 
+# Wait-for-input procedure
 def stack_main
 puts
 print ">" + @cur_info + ":"
@@ -495,6 +484,7 @@ print ">" + @cur_info + ":"
 	end
 end
 
+# Release the kraken !!!!111
 stack_header
 stack_help
 

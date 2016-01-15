@@ -1,4 +1,4 @@
-### Stackrecord
+### Stackrecord v200 (Release 15/01/2016)
 Stackrecord is Github based changelog repository API built for developers to keep changes of their project releases. We offer a free accounts for all solo developers and freelancers. You can read more about Stackrecord on our [official website](https://stackrecord.com).
 
 ### Stack-CLI

@@ -2,6 +2,12 @@
 Halis Duraki <dev@stackrecord.com>
 Stackrecord  <https://stackrecord.com>
 
+15/01/2016 (Version 200-OK)
+[+] Added: Function to manipulate with calls internally
+[+] Fixed: HTTPS URI errors
+[+] Fixed: Crash on --change OPS (change has whitespace)
+[+] Deprecated: API calls on http://-URIs
+
 13/01/2016 (Thiz looks good)
 [+] Added: A new way to manipulate with commands and operators
 [+] Added: SET and UNSET working repository
